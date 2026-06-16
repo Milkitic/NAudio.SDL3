@@ -2,9 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using NAudio.SDL3.Interop;
 using NAudio.SDL3.WaveProviders;
 using NAudio.Wave;
-using SdlNative = NAudio.SDL3.Interop.SdlNative;
 
 namespace NAudio.SDL3;
 
@@ -13,7 +13,7 @@ namespace NAudio.SDL3;
 /// </summary>
 public sealed unsafe class Sdl3Out : IWavePlayer, IWavePosition
 {
-    private static readonly Lock StreamOpenLock = new();
+    private static readonly Lock s_streamOpenLock = new();
 
     private readonly SynchronizationContext? _syncContext;
     private readonly string? _deviceName;
@@ -36,14 +36,16 @@ public sealed unsafe class Sdl3Out : IWavePlayer, IWavePosition
     private bool _sourceExhausted;
     private volatile PlaybackState _state = PlaybackState.Stopped;
 
-    public Sdl3Out() : this(null, 64)
+    public Sdl3Out() : this(null)
     {
     }
 
+    /// <param name="deviceName"></param>
     /// <param name="desiredBufferFrames">
     /// Requested SDL3 device buffer size in sample frames. SDL3 treats this as a hint.
     /// Latency-to-frame conversion belongs to the caller.
     /// </param>
+    /// <param name="fallbackToDefaultDevice"></param>
     public Sdl3Out(
         string? deviceName,
         int desiredBufferFrames = 64,
@@ -557,7 +559,7 @@ public sealed unsafe class Sdl3Out : IWavePlayer, IWavePosition
         {
             ThreadPool.QueueUserWorkItem(static state =>
             {
-                var (h, sender, a) = ((EventHandler<StoppedEventArgs>, object, StoppedEventArgs))state!;
+                var (h, sender, a) = ((EventHandler<StoppedEventArgs>, object, StoppedEventArgs))state;
                 h(sender, a);
             }, (handler, (object)this, args), preferLocal: false);
         }
@@ -580,7 +582,7 @@ public sealed unsafe class Sdl3Out : IWavePlayer, IWavePosition
         }
 
         IntPtr stream;
-        lock (StreamOpenLock)
+        lock (s_streamOpenLock)
         {
             _ = SdlNative.SDL_SetHint(
                 SdlNative.SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES,
