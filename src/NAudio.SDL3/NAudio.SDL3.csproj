@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>NAudio.SDL3</RootNamespace>
+    <AssemblyName>NAudio.SDL3</AssemblyName>
+    <Description>Cross-platform IWavePlayer implementation backed by the SDL3 audio stream subsystem.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="ppy.SDL3-CS" Version="2026.520.0" PrivateAssets="compile" />
+  </ItemGroup>
+
+</Project>
